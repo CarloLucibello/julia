@@ -43,7 +43,7 @@ using ..SparseArrays.CHOLMOD: C_Dense, C_Sparse, Dense, ITypes, Sparse, VTypes, 
 
 import Base: size
 import Base.LinAlg: qrfact
-import ..SparseArrays.CHOLMOD: convert, free!
+import ..SparseArrays.CHOLMOD: check, convert, free!
 
 
 
@@ -85,6 +85,8 @@ function free!{Tv<:VTypes}(F::Factorization{Tv})
 end
 
 function backslash{Tv<:VTypes}(ordering::Integer, tol::Real, A::Sparse{Tv}, B::Dense{Tv})
+    check(A)
+    check(B)
     m, n  = size(A)
     if m != size(B, 1)
         throw(DimensionMismatch("left hand side and right hand side must have same number of rows"))
@@ -97,6 +99,7 @@ function backslash{Tv<:VTypes}(ordering::Integer, tol::Real, A::Sparse{Tv}, B::D
 end
 
 function factorize{Tv<:VTypes}(ordering::Integer, tol::Real, A::Sparse{Tv})
+    check(A)
     s = unsafe_load(A.p)
     if s.stype != 0
         throw(ArgumentError("stype must be zero"))
@@ -109,6 +112,8 @@ function factorize{Tv<:VTypes}(ordering::Integer, tol::Real, A::Sparse{Tv})
 end
 
 function solve{Tv<:VTypes}(system::Integer, QR::Factorization{Tv}, B::Dense{Tv})
+    check(QR)
+    check(B)
     m, n = size(QR)
     mB = size(B, 1)
     if (system == RX_EQUALS_B || system == RETX_EQUALS_B) && m != mB
@@ -124,6 +129,8 @@ function solve{Tv<:VTypes}(system::Integer, QR::Factorization{Tv}, B::Dense{Tv})
 end
 
 function qmult{Tv<:VTypes}(method::Integer, QR::Factorization{Tv}, X::Dense{Tv})
+    check(QR)
+    check(X)
     mQR, nQR = size(QR)
     mX, nX = size(X)
     if (method == QTX || method == QX) && mQR != mX
